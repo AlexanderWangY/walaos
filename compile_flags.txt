@@ -1,0 +1,7 @@
+-std=gnu11
+-ffreestanding
+-Wall
+-Wextra
+-D__is_kernel
+-Ikernel/include
+-Ilibc/include
