@@ -1,7 +1,10 @@
-#include <stdio.h>
 #include <kernel/tty.h>
+#include <kernel/log.h>
+#include <kernel/panic.h>
 
 void kernel_main(void) {
   terminal_initialize();
-  printf("Hello, kernel world!\n");
+
+  kerror("Something went wrong");
+  panic("Killing kernel");
 }
