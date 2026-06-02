@@ -1,10 +1,11 @@
 #include <kernel/tty.h>
 #include <kernel/log.h>
 #include <kernel/panic.h>
+#include <kernel/assert.h>
 
 void kernel_main(void) {
   terminal_initialize();
 
   kerror("Something went wrong");
-  panic("Killing kernel");
+  kassert(10 == 11);
 }
