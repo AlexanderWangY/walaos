@@ -1,11 +1,20 @@
 #include <kernel/tty.h>
+#include <kernel/keyboard.h>
 #include <kernel/log.h>
-#include <kernel/panic.h>
-#include <kernel/assert.h>
 
 void kernel_main(void) {
   terminal_initialize();
+  keyboard_initialize();
+  debug_init();
 
-  kerror("Something went wrong");
-  kassert(10 == 11);
+  debug_write("Starting walaos kernel.\n");
+
+  for (;;) {
+    char c = keyboard_poll();
+
+    if (c) {
+      debug_write("Writing a character.\n");
+      terminal_putchar(c);
+    }
+  }
 }

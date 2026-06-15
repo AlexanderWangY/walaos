@@ -18,7 +18,7 @@ static uint16_t* terminal_buffer;
 
 // ----- HELPER FUNCTIONS -------
 
-size_t get_buf_index(size_t x, size_t y) {
+static size_t get_buf_index(size_t x, size_t y) {
   return y * VGA_WIDTH + x;
 }
 
