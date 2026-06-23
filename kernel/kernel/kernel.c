@@ -1,19 +1,27 @@
 #include <kernel/tty.h>
 #include <kernel/keyboard.h>
 #include <kernel/log.h>
+#include <kernel/arch.h>
 
 void kernel_main(void) {
+  // Bring up the console first (VGA + serial) so every subsequent boot
+  // step is logged to both the screen and the serial port.
   terminal_initialize();
-  keyboard_initialize();
   debug_init();
 
-  debug_write("Starting walaos kernel.\n");
+  kinfo("walaos kernel starting");
+
+  arch_initialize();
+
+  keyboard_initialize();
+  kinfo("keyboard: PS/2 driver ready");
+
+  kinfo("boot complete, entering main loop");
 
   for (;;) {
     char c = keyboard_poll();
 
     if (c) {
-      debug_write("Writing a character.\n");
       terminal_putchar(c);
     }
   }

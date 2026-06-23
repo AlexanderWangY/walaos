@@ -11,6 +11,7 @@ cat > "$tmpdir/kernel_main_test.c" <<EOF
 #include <stdlib.h>
 #include <string.h>
 
+static int arch_initialized;
 static int terminal_initialized;
 static int keyboard_initialized;
 static size_t output_len;
@@ -18,6 +19,10 @@ static char output[16];
 
 static const char keyboard_chars[] = { 0, 'h', 0, 'I' };
 static size_t keyboard_index;
+
+void arch_initialize(void) {
+  arch_initialized++;
+}
 
 void terminal_initialize(void) {
   terminal_initialized++;
@@ -59,6 +64,11 @@ void debug_write(const char *data) {
 char keyboard_poll(void) {
   if (keyboard_index < sizeof(keyboard_chars)) {
     return keyboard_chars[keyboard_index++];
+  }
+
+  if (arch_initialized != 1) {
+    fprintf(stderr, "expected arch_initialize once, got %d\\n", arch_initialized);
+    exit(1);
   }
 
   if (terminal_initialized != 1) {

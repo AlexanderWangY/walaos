@@ -11,5 +11,6 @@
 // This is for serial debugging
 void debug_init(void);
 void debug_write(const char* data);
+void debug_putchar(char c);
 
 #endif
