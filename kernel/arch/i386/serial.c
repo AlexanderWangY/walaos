@@ -30,11 +30,6 @@ void serial_putchar(char c) {
 }
 
 void serial_write(const char *data) {
-  while (*data) {
-    if (*data == '\n') {
-      serial_putchar('\r');
-    }
-
+  while (*data)
     serial_putchar(*data++);
-  }
 }

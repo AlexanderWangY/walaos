@@ -6,13 +6,12 @@ void debug_init(void) {
 }
 
 void debug_write(const char *data) {
-  serial_write(data);
+  while (*data)
+    debug_putchar(*data++);
 }
 
 void debug_putchar(char c) {
-  if (c == '\n') {
+  if (c == '\n')
     serial_putchar('\r');
-  }
-
   serial_putchar(c);
 }
