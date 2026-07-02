@@ -5,18 +5,15 @@
 #include <stdio.h>
 #include <string.h>
 
-static bool print(const char* data, size_t length) {
+static bool print(putc_fn put, const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
 	for (size_t i = 0; i < length; i++)
-		if (putchar(bytes[i]) == EOF)
+		if (put(bytes[i]) == EOF)
 			return false;
 	return true;
 }
 
-int printf(const char* restrict format, ...) {
-	va_list parameters;
-	va_start(parameters, format);
-
+int vcbprintf(putc_fn put, const char* restrict format, va_list parameters) {
 	int written = 0;
 
 	while (*format != '\0') {
@@ -32,7 +29,7 @@ int printf(const char* restrict format, ...) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
 			}
-			if (!print(format, amount))
+			if (!print(put, format, amount))
 				return -1;
 			format += amount;
 			written += amount;
@@ -46,7 +43,7 @@ int printf(const char* restrict format, ...) {
 			char c = (char) va_arg(parameters, int);
 			if (!maxrem)
 				return -1;
-			if (!print(&c, sizeof(c)))
+			if (!print(put, &c, sizeof(c)))
 				return -1;
 			written++;
 		} else if (*format == 's') {
@@ -55,7 +52,7 @@ int printf(const char* restrict format, ...) {
 			size_t len = strlen(str);
 			if (maxrem < len)
 				return -1;
-			if (!print(str, len))
+			if (!print(put, str, len))
 				return -1;
 			written += len;
 		} else if (*format == 'd' || *format == 'i') {
@@ -65,10 +62,11 @@ int printf(const char* restrict format, ...) {
 			int i = 0;
 			unsigned int uval;
 			if (value < 0) {
-				if (!print("-", 1))
+				if (!print(put, "-", 1))
 					return -1;
 				written++;
-				uval = (unsigned int)(-(long)value);
+				// Unsigned negation is well-defined even for INT_MIN.
+				uval = -(unsigned int)value;
 			} else {
 				uval = (unsigned int)value;
 			}
@@ -81,7 +79,7 @@ int printf(const char* restrict format, ...) {
 				}
 			}
 			for (int j = i - 1; j >= 0; j--) {
-				if (!print(&buf[j], 1))
+				if (!print(put, &buf[j], 1))
 					return -1;
 				written++;
 			}
@@ -99,7 +97,7 @@ int printf(const char* restrict format, ...) {
 				}
 			}
 			for (int j = i - 1; j >= 0; j--) {
-				if (!print(&buf[j], 1))
+				if (!print(put, &buf[j], 1))
 					return -1;
 				written++;
 			}
@@ -119,14 +117,14 @@ int printf(const char* restrict format, ...) {
 				}
 			}
 			for (int j = i - 1; j >= 0; j--) {
-				if (!print(&buf[j], 1))
+				if (!print(put, &buf[j], 1))
 					return -1;
 				written++;
 			}
 		} else if (*format == 'p') {
 			format++;
 			uintptr_t value = (uintptr_t)(va_arg(parameters, void*));
-			if (!print("0x", 2))
+			if (!print(put, "0x", 2))
 				return -1;
 			written += 2;
 			char buf[8];
@@ -134,7 +132,7 @@ int printf(const char* restrict format, ...) {
 				buf[i] = "0123456789abcdef"[value & 0xF];
 				value >>= 4;
 			}
-			if (!print(buf, 8))
+			if (!print(put, buf, 8))
 				return -1;
 			written += 8;
 		} else {
@@ -142,12 +140,21 @@ int printf(const char* restrict format, ...) {
 			size_t len = strlen(format);
 			if (maxrem < len)
 				return -1;
-			if (!print(format, len))
+			if (!print(put, format, len))
 				return -1;
 			written += len;
 			format += len;
 		}
 	}
+
+	return written;
+}
+
+int printf(const char* restrict format, ...) {
+	va_list parameters;
+	va_start(parameters, format);
+
+	int written = vcbprintf(putchar, format, parameters);
 
 	va_end(parameters);
 	return written;

@@ -1,3 +1,4 @@
+#include "arch/io.h"
 #include "kernel/log.h"
 #include <arch/idt.h>
 #include <stdint.h>
@@ -10,6 +11,30 @@
 #define KERNEL_CS 0x08
 #define KERNEL_DS 0x10
 
+// For PIC
+#define PIC1 0x20
+#define PIC2 0xA0
+#define PIC1_CMD PIC1
+#define PIC1_DATA (PIC1 + 1)
+#define PIC2_CMD PIC2
+#define PIC2_DATA (PIC2 + 1)
+#define PIC_EOI 0x20
+
+#define ICW1_ICW4	0x01		/* Indicates that ICW4 will be present */
+#define ICW1_SINGLE	0x02		/* Single (cascade) mode */
+#define ICW1_INTERVAL4	0x04		/* Call address interval 4 (8) */
+#define ICW1_LEVEL	0x08		/* Level triggered (edge) mode */
+#define ICW1_INIT	0x10		/* Initialization - required! */
+
+#define ICW4_8086	0x01		/* 8086/88 (MCS-80/85) mode */
+#define ICW4_AUTO	0x02		/* Auto (normal) EOI */
+#define ICW4_BUF_SLAVE	0x08		/* Buffered mode/slave */
+#define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
+#define ICW4_SFNM	0x10		/* Special fully nested (not) */
+
+#define CASCADE_IRQ 2
+#define IRQ_BASE 32
+
 // Macros for isr stub generation
 #define ISR_TABLE(X) \
   X(0) X(1) X(2) X(3) X(4) X(5) X(6) X(7) \
@@ -17,10 +42,51 @@
   X(16) X(17) X(18) X(19) X(20) X(21) X(22) X(23) \
   X(24) X(25) X(26) X(27) X(28) X(29) X(30) X(31)
 
+// Macros for irq stub generation (hardware IRQs 0-15, vectors 32-47)
+#define IRQ_TABLE(X) \
+  X(0) X(1) X(2) X(3) X(4) X(5) X(6) X(7) \
+  X(8) X(9) X(10) X(11) X(12) X(13) X(14) X(15)
+
 // Declarations are legal at file scope, so the extern block is fine here.
 #define AS_ISR_EXTERN(n) extern void isr##n##_stub(void);
 ISR_TABLE(AS_ISR_EXTERN)
 #undef AS_ISR_EXTERN
+
+#define AS_IRQ_EXTERN(n) extern void irq##n##_stub(void);
+IRQ_TABLE(AS_IRQ_EXTERN)
+#undef AS_IRQ_EXTERN
+
+static void pic_sendeoi(uint8_t irq) {
+  if (irq >= 8) {
+    outb(PIC2_CMD, PIC_EOI);
+  }
+
+  outb(PIC1_CMD, PIC_EOI);
+}
+
+static void pic_remap(int master_offset, int sub_offset) {
+  outb(PIC1_CMD, ICW1_INIT | ICW1_ICW4);
+  io_wait();
+  outb(PIC2_CMD, ICW1_INIT | ICW1_ICW4);
+  io_wait();
+  outb(PIC1_DATA, master_offset);
+  io_wait();
+  outb(PIC2_DATA, sub_offset);
+  io_wait();
+  outb(PIC1_DATA, 1 << CASCADE_IRQ);
+  io_wait();
+  outb(PIC2_DATA, 2);
+  io_wait();
+
+  outb(PIC1_DATA, ICW4_8086);
+  io_wait();
+  outb(PIC2_DATA, ICW4_8086);
+  io_wait();
+
+  // Mask all IRQs until handlers exist; unmask per-device as drivers land.
+  outb(PIC1_DATA, 0xFF);
+  outb(PIC2_DATA, 0xFF);
+}
 
 struct interrupt_frame {
     uint32_t gs, fs, es, ds;
@@ -76,6 +142,10 @@ static void idt_load() {
 
 static void halt_with_warning(const char *message) __attribute__((noreturn));
 
+static void pic_clear_mask(uint8_t irq) {
+  uint16_t port = irq < 8 ? PIC1_DATA : PIC2_DATA;
+  outb(port, inb(port) & ~(1 << (irq & 7)));
+}
 static void halt_with_warning(const char *message) {
   kwarn("%s", message);
 
@@ -84,6 +154,9 @@ static void halt_with_warning(const char *message) {
   }
 }
 
+static uint32_t pit_count = 0;
+static uint32_t pit_seconds = 0;
+
 void init_idt(void) {
 
   // Generate isr gates
@@ -91,16 +164,53 @@ void init_idt(void) {
   ISR_TABLE(AS_ISR_GATE)
   #undef AS_ISR_GATE
 
+  // Generate irq gates at vectors 32-47
+  #define AS_IRQ_GATE(n) idt_set_gate(idt, (n) + IRQ_BASE, irq##n##_stub, KERNEL_CS, IDT_KERNEL_INTERRUPT_GATE);
+  IRQ_TABLE(AS_IRQ_GATE)
+  #undef AS_IRQ_GATE
+
   idt_ptr.limit = sizeof(idt) - 1;
   idt_ptr.base = (uint32_t)idt;
 
   idt_load();
 
   kinfo("idt: loaded descriptors into IDT");
+  pic_remap(0x20, 0x28); // Remap to 32 - 47
+  kinfo("pic: remapped PIC for irq");
+
+  pic_clear_mask(0);
+  kinfo("irq 0: detected and loaded");
+
+  __asm__ volatile("sti");
+}
+
+static void irq_interrupt_handler(struct interrupt_frame *frame) {
+  uint8_t irq = frame->int_no - 32;
+
+  switch (irq) {
+  case 0:
+    // PIT TIMER
+    if (++pit_count == 18) {
+      pit_count = 0;
+      debug_printf("PIT Tick: %d\n", ++pit_seconds);
+    }
+  case 1:
+    // stash, this is a 
+    break;
+  default:
+    break;
+  }
+
+  pic_sendeoi(irq);
 }
 
 void interrupt_handler(struct interrupt_frame *frame) {
   const char *message;
+
+  if (frame->int_no >= 32 && frame->int_no <= 47) {
+    irq_interrupt_handler(frame);
+    return;
+  }
 
   switch (frame->int_no) {
   case 0:

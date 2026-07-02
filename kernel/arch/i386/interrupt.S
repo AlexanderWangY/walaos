@@ -6,7 +6,7 @@ isr\num\()_stub:
  cli
  pushl $0
  pushl $\num
- jmp isr_common_stub
+ jmp common_stub
 .endm
 
 
@@ -15,7 +15,16 @@ isr\num\()_stub:
 isr\num\()_stub:
  cli
  pushl $\num
- jmp isr_common_stub
+ jmp common_stub
+.endm
+
+.macro IRQ num
+ .globl irq\num\()_stub
+irq\num\()_stub:
+ cli
+ pushl $0
+ pushl $(\num + 32)
+ jmp common_stub
 .endm
 
 .extern interrupt_handler
@@ -53,7 +62,24 @@ ISR_NOERR 29
 ISR_NOERR 30
 ISR_NOERR 31
 
-isr_common_stub:
+IRQ 0
+IRQ 1
+IRQ 2
+IRQ 3
+IRQ 4
+IRQ 5
+IRQ 6
+IRQ 7
+IRQ 8
+IRQ 9
+IRQ 10
+IRQ 11
+IRQ 12
+IRQ 13
+IRQ 14
+IRQ 15
+
+common_stub:
     pusha
 
     /*
