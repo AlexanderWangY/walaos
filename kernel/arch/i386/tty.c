@@ -4,8 +4,12 @@
 #include <string.h>
 
 #include <kernel/tty.h>
+#include <arch/io.h>
 
 #include "vga.h"
+
+#define VGA_CRTC_INDEX 0x3D4
+#define VGA_CRTC_DATA 0x3D5
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -24,9 +28,20 @@ static size_t get_buf_index(size_t x, size_t y) {
 
 // ------------------------------
 
+void terminal_setcursor(size_t x, size_t y) {
+  size_t pos = get_buf_index(x, y);
+
+  outb(VGA_CRTC_INDEX, 0x0E);
+  outb(VGA_CRTC_DATA, (pos >> 8) & 0xFF);
+
+  outb(VGA_CRTC_INDEX, 0x0F);
+  outb(VGA_CRTC_DATA, pos & 0xFF);
+}
+
 void terminal_initialize(void) {
   terminal_row = 0;
   terminal_column = 0;
+  terminal_setcursor(0, 0);
   terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
   terminal_buffer = VGA_MEMORY;
 
@@ -88,6 +103,8 @@ void terminal_putchar(char c) {
   if (terminal_row == VGA_HEIGHT) {
     terminal_scroll();
   }
+
+  terminal_setcursor(terminal_column, terminal_row);
 }
 
 void terminal_write(const char *data, size_t size) {
@@ -107,4 +124,5 @@ void terminal_clear(void) {
 
   terminal_row = 0;
   terminal_column = 0;
+  terminal_setcursor(0, 0);
 }
