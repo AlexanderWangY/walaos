@@ -98,3 +98,13 @@ void terminal_write(const char *data, size_t size) {
 void terminal_writestring(const char *data) {
   terminal_write(data, strlen(data));
 }
+
+// Just scrolls everything off
+void terminal_clear(void) {
+  for (size_t i = 0; i < VGA_HEIGHT; ++i) {
+    terminal_scroll();
+  }
+
+  terminal_row = 0;
+  terminal_column = 0;
+}

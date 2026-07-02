@@ -13,6 +13,7 @@ cat > "$tmpdir/kernel_main_test.c" <<EOF
 
 static int arch_initialized;
 static int terminal_initialized;
+static int terminal_cleared;
 static int keyboard_initialized;
 static size_t output_len;
 static char output[16];
@@ -28,7 +29,16 @@ void terminal_initialize(void) {
   terminal_initialized++;
 }
 
+void terminal_clear(void) {
+  terminal_cleared++;
+}
+
 void terminal_putchar(char c) {
+  if (terminal_cleared != 1) {
+    fprintf(stderr, "expected terminal_clear before terminal output, got %d\\n", terminal_cleared);
+    exit(1);
+  }
+
   if (output_len >= sizeof(output)) {
     fputs("terminal output overflow\\n", stderr);
     exit(1);
@@ -73,6 +83,11 @@ char keyboard_poll(void) {
 
   if (terminal_initialized != 1) {
     fprintf(stderr, "expected terminal_initialize once, got %d\\n", terminal_initialized);
+    exit(1);
+  }
+
+  if (terminal_cleared != 1) {
+    fprintf(stderr, "expected terminal_clear once, got %d\\n", terminal_cleared);
     exit(1);
   }
 

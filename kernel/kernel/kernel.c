@@ -19,11 +19,7 @@ void kernel_main(void) {
 
   kinfo("boot complete, entering main loop");
 
-  // Try and hit isr0 divide by 0 fault.
-  volatile int x = 0;
-  volatile int y = 1;
-  volatile int z = y / x;
-  (void)z;
+  terminal_clear();
 
   for (;;) {
     char c = keyboard_poll();
