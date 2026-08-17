@@ -24,4 +24,3 @@ void uart_putstr(struct uart *u, const char *c) {
     c++;
   }
 }
-

@@ -5,6 +5,20 @@ _start:
     csrr t0, mhartid
     bnez t0, hang # If not hart 0, don't run the rest
 
+    # Configure PMP
+    li t0, -1
+    csrw pmpaddr0, t0
+    li t0, 0x1F # NAPOT + R/W/X
+    csrw pmpcfg0, t0
+
+    # Configure interrupt dest to S mode
+    li t0, 0xFFFF
+    csrw medeleg, t0
+    csrw mideleg, t0
+
+    # Store mhartid somewhere Supervisor can read
+    csrr tp, mhartid
+
     csrw satp, x0
     la sp, stack_top
 
