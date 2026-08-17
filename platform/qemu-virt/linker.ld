@@ -10,6 +10,7 @@ SECTIONS {
     .bss : ALIGN(4K) {
         PROVIDE(bss_start = .);
         *(.bss);
+        *(.sbss);
         PROVIDE(bss_end = .);
     }
 
