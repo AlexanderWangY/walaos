@@ -1,5 +1,10 @@
 .global _start
 _start:
+    # basically used to stop race condition on startup
+    # on multi hart (core) platforms
+    csrr t0, mhartid
+    bnez t0, hang # If not hart 0, don't run the rest
+
     csrw satp, x0
     la sp, stack_top
 
