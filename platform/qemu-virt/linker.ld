@@ -20,7 +20,7 @@ SECTIONS {
     }
 
     .rodata : ALIGN(4K) {
-        *(.rodata);
+        *(.rodata .rodata.*);
     }
 
     .data : ALIGN(4K) {
