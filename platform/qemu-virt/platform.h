@@ -1,1 +1,0 @@
-#define UART0 0x1000000L
