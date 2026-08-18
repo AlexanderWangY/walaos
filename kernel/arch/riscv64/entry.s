@@ -1,5 +1,9 @@
 .global _start
 _start:
+.option push
+.option norelax
+    la gp, __global_pointer$
+.option pop
     # basically used to stop race condition on startup
     # on multi hart (core) platforms
     csrr t0, mhartid
