@@ -1,12 +1,8 @@
 #include <stdint.h>
 #include "uart.h"
 
-struct uart init_uart(uintptr_t address) {
-  struct uart x = {
-    .base = address
-  };
-
-  return x;
+void init_uart(struct uart *u, uintptr_t address) {
+   u->base = address;
 }
 
 
