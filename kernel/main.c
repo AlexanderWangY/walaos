@@ -20,6 +20,7 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
     __asm__ volatile ("ecall");
 
     console_puts("Text after ecall\n");
+    kprintf("Hello there the answer is %d and I like %s\n", 10, "apples");
 
     for (;;)
         __asm__ volatile ("wfi");
