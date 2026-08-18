@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#define EXC_S_ECALL 9
+
 struct trap_frame {
   uint64_t ra;
   uint64_t sp;

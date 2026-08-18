@@ -19,6 +19,8 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
 
     __asm__ volatile ("ecall");
 
+    console_puts("Text after ecall\n");
+
     for (;;)
         __asm__ volatile ("wfi");
 }

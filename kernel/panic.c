@@ -3,7 +3,7 @@
 
 void panic(const char *msg) {
   
-  console_puts("[KERNEL] panicked: ");
+  console_puts("[PANIC] ");
   console_puts(msg);
   console_puts("\n");
 
