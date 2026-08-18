@@ -9,6 +9,8 @@ CFLAGS := -march=rv64imac_zicsr_zifencei -mabi=lp64 -mcmodel=medany -ffreestandi
 LDFLAGS := -nostdlib -static -T platform/$(PLATFORM)/linker.ld
 
 SRCS := kernel/arch/riscv64/entry.s \
+		kernel/arch/riscv64/trap_entry.s \
+		kernel/arch/riscv64/trap.c \
 		kernel/main.c \
 		kernel/console.c \
 		kernel/panic.c \
