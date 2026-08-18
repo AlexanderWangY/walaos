@@ -1,4 +1,4 @@
-#include "ns16550.h"
+#include <uart/ns16550.h>
 #include <stdint.h>
 
 #define RBR 0 // Receive buffer

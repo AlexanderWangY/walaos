@@ -1,0 +1,2 @@
+[language-server.clangd]
+args = ["--query-driver=/opt/homebrew/bin/riscv64-elf-*"]

@@ -1,7 +1,12 @@
-#include "include/console.h"
-#include "include/platform.h"
+#include <console.h>
+#include <platform.h>
 
 void console_putc(char c) {
+    if (c == '\r') {
+        platform_console_putc('\n');
+        platform_console_putc('\r');
+        return;
+    }
     if (c == '\n')
         platform_console_putc('\r');
     platform_console_putc(c);

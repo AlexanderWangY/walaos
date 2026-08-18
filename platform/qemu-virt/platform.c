@@ -1,5 +1,5 @@
-#include "../../kernel/include/platform.h"
-#include "../../kernel/drivers/uart/ns16550.h"
+#include <platform.h>
+#include <uart/ns16550.h>
 
 #define UART0 0x10000000UL
 

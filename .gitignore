@@ -1,3 +1,6 @@
 # Build outputs
 /build/
 /kernel.elf
+
+# Tool caches
+/.cache/

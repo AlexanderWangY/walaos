@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "uart.h"
+#include <uart/uart.h>
 
 void init_uart(struct uart *u, uintptr_t address) {
    u->base = address;
