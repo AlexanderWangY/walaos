@@ -4,6 +4,8 @@
 #include <console.h>
 #include <platform.h>
 #include <stdint.h>
+#include <panic.h>
+
 void kmain(unsigned long hart_id, unsigned long dtb) {
     (void)hart_id;
     (void)dtb;
@@ -13,11 +15,7 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
     console_puts(platform_name());
     console_puts("\n");
 
-    // Poll for characters
-    int o;
-    while ((o = platform_console_getc()) != -1) {
-        console_putc(o);
-    }
+    panic("unknown error occured");
 
     for (;;)
         __asm__ volatile ("wfi");

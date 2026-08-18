@@ -11,6 +11,7 @@ LDFLAGS := -nostdlib -static -T platform/$(PLATFORM)/linker.ld
 SRCS := kernel/arch/riscv64/entry.s \
 		kernel/main.c \
 		kernel/console.c \
+		kernel/panic.c \
 		kernel/drivers/uart/ns16550.c \
 		platform/$(PLATFORM)/platform.c
 
