@@ -25,7 +25,7 @@ build/%.o: %
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 run: kernel.elf
-	qemu-system-riscv64 -machine virt -bios none -display none -serial stdio -kernel $<
+	qemu-system-riscv64 -machine virt -smp 1 -m 8G -bios none -display none -serial stdio -kernel $<
 
 clean:
 	rm -rf build kernel.elf
