@@ -21,6 +21,7 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
 
     console_puts("Text after ecall\n");
     kprintf("Hello there the answer is %d and I like %s\n", 10, "apples");
+    kprintf("64-bit hex test: 0x%lX\n", 0x123456789ABCDEF0UL);
 
     for (;;)
         __asm__ volatile ("wfi");

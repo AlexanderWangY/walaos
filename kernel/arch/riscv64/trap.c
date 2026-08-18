@@ -8,9 +8,9 @@ extern void supervisor_trap_entry(void);
 static inline void log_trap(uint64_t sepc, uint64_t sstatus, uint64_t scause, uint64_t stval) {
   uint64_t is_interrupt = scause >> 63;
   if (is_interrupt)
-    klog(INFO, "IRQ: sepc 0x%X sstatus %X scause %X stval %X\n", sepc, sstatus, scause, stval);
+    klog(INFO, "IRQ: sepc 0x%lX sstatus %lX scause %lX stval %lX\n", sepc, sstatus, scause, stval);
   else
-    klog(INFO, "EXCPTN: sepc 0x%X sstatus %X scause %X stval %X\n", sepc, sstatus, scause, stval);
+    klog(INFO, "EXCPTN: sepc 0x%lX sstatus %lX scause %lX stval %lX\n", sepc, sstatus, scause, stval);
 }
 
 static inline void write_stvec(uintptr_t value) {
@@ -54,4 +54,3 @@ void supervisor_trap_handler(struct trap_frame *tf) {
      return handle_exception(tf, cause);
    }
 }
-

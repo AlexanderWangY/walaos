@@ -1,6 +1,7 @@
 #include <console.h>
 #include <platform.h>
 #include <stdarg.h>
+#include <stdint.h>
 
 void console_putc(char c) {
     if (c == '\r') {
@@ -19,11 +20,11 @@ void console_puts(const char *s) {
 }
 
 // is_capitalized is true if 1 else 0
-void print_hex(unsigned int value, int is_capitalized) {
+void print_hex(uint64_t value, int is_capitalized) {
     char ldigits[] = "0123456789abcdef";
     char udigits[] = "0123456789ABCDEF";
 
-    char buf[10];
+    char buf[16];
     int i = 0;
 
     if (value == 0) {
@@ -70,6 +71,9 @@ void vkprintf(const char *s, va_list args) {
         if (*s == '%') {
             s++;
 
+            if (*s == 'l')
+                s++;
+
             switch (*s) {
                 case 'd': {
                     int value = va_arg(args, int);
@@ -91,12 +95,20 @@ void vkprintf(const char *s, va_list args) {
                     break;
                 }
                 case 'x': {
-                    int value = va_arg(args, int);
+                    uint64_t value;
+                    if (*(s - 1) == 'l')
+                        value = va_arg(args, unsigned long);
+                    else
+                        value = va_arg(args, unsigned int);
                     print_hex(value, 0);
                     break;
                 }
                 case 'X': {
-                    int value = va_arg(args, int);
+                    uint64_t value;
+                    if (*(s - 1) == 'l')
+                        value = va_arg(args, unsigned long);
+                    else
+                        value = va_arg(args, unsigned int);
                     print_hex(value, 1);
                     break;
                 }
