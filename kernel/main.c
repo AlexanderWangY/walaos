@@ -17,7 +17,8 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
     console_puts(platform_name());
     console_puts("\n");
 
-    panic("unknown error occured");
+    int x = 10 / 0;
+
 
     for (;;)
         __asm__ volatile ("wfi");

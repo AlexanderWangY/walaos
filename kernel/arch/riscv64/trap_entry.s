@@ -52,7 +52,7 @@ supervisor_trap_entry:
     sd t0, 272(sp)
 
     mv a0, sp
-    call supervisor_interrupt_handler
+    call supervisor_trap_handler
 
     ld ra, 0(sp)
     ld gp, 16(sp)
