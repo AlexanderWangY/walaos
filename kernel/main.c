@@ -17,8 +17,7 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
     console_puts(platform_name());
     console_puts("\n");
 
-    int x = 10 / 0;
-
+    __asm__ volatile ("ecall");
 
     for (;;)
         __asm__ volatile ("wfi");

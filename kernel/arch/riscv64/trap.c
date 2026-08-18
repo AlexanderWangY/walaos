@@ -77,7 +77,9 @@ void handle_exception(struct trap_frame *tf, uint64_t cause) {
     case 8:
       break;
     case 9:
-      // supervisor external interrupt
+      // E call
+      console_puts("Got S mode ECALL");
+      tf->sepc += 4;
       break;
     case 10:
     case 11:
