@@ -18,6 +18,28 @@ void console_puts(const char *s) {
         console_putc(*s++);
 }
 
+// is_capitalized is true if 1 else 0
+void print_hex(unsigned int value, int is_capitalized) {
+    char ldigits[] = "0123456789abcdef";
+    char udigits[] = "0123456789ABCDEF";
+
+    char buf[10];
+    int i = 0;
+
+    if (value == 0) {
+        console_putc('0');
+        return;
+    }
+
+    while (value > 0) {
+        buf[i++] = is_capitalized == 1 ? udigits[value % 16] : ldigits[value % 16];
+        value /= 16;
+    }
+
+    while (i > 0)
+        console_putc(buf[--i]);
+}
+
 void print_uint(unsigned int value) {
     char buf[10];
     int i = 0;
@@ -43,11 +65,7 @@ void print_int(int value) {
     }
 }
 
-
-void kprintf(const char *s, ...) {
-    va_list args;
-    va_start(args, s);
-
+void vkprintf(const char *s, va_list args) {
     while (*s) {
         if (*s == '%') {
             s++;
@@ -72,6 +90,16 @@ void kprintf(const char *s, ...) {
                     console_putc('%');
                     break;
                 }
+                case 'x': {
+                    int value = va_arg(args, int);
+                    print_hex(value, 0);
+                    break;
+                }
+                case 'X': {
+                    int value = va_arg(args, int);
+                    print_hex(value, 1);
+                    break;
+                }
             }
         } else {
             console_putc(*s);
@@ -79,6 +107,39 @@ void kprintf(const char *s, ...) {
 
         s++;
     }
+}
 
+
+void kprintf(const char *s, ...) {
+    va_list args;
+    va_start(args, s);
+
+    vkprintf(s, args);
+    
     va_end(args);
+}
+
+void klog(enum LOG_LEVEL lvl, const char *s, ...){
+    switch (lvl) {
+        case DEBUG:
+            console_puts("[DEBUG] ");
+            break;
+        case INFO:
+            console_puts("[INFO] ");
+            break;
+        case WARN:
+            console_puts("[WARN] ");
+            break;
+        case PANIC:
+            console_puts("[PANIC] ");
+            break;
+    }
+
+    va_list args;
+    va_start(args, s);
+
+    vkprintf(s, args);
+    
+    va_end(args);
+
 }
