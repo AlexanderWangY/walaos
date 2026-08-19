@@ -16,7 +16,7 @@ static inline volatile uint8_t *reg(uintptr_t base, int offset) {
 }
 
 void ns16550_init(uintptr_t base) {
-    *reg(base, IER) = 0x00; // No interrupts right now, poll
+    *reg(base, IER) = 0x01; // Enabled interrupt
     *reg(base, LCR) = 0x03;
     *reg(base, FCR) = 0x01; // Enable FIFO
 
