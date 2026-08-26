@@ -4,6 +4,8 @@
 #include <trap.h>
 #include <platform.h>
 
+static uint64_t tick = 0;
+
 extern void supervisor_trap_entry(void);
 extern void setup_program_timer(void);
 
@@ -29,9 +31,13 @@ void trap_init(void) {
 
 
 void handle_interrupt(struct trap_frame *tf, uint64_t cause) {
+  (void)tf;
+
   switch (cause) {
-    case 5:
-      klog(DEBUG, "Timer interrupted");
+    case IRQ_S_TIMER:
+      ++tick;
+      setup_program_timer();
+      klog(DEBUG, "Tick: %d\n", tick);
       break;
     default:
       panic("unhandled interrupt trap cause");

@@ -11,7 +11,10 @@ setup_program_timer:
     li t1, 100000
     add t0, t0, t1
     csrw stimecmp, t0
+    ret
+.size setup_program_timer, . - setup_program_timer
 
+.balign 4
 supervisor_trap_entry:
     # struct trap_frame is 288 bytes and remains 16-byte aligned.
     addi sp, sp, -288
