@@ -2,10 +2,13 @@
 
 #include <stdint.h>
 
+
+#define IRQ_S_TIMER 5
+#define IRQ_S_EXTERNAL 9
+
 #define EXC_S_MISALIGN 0
 #define EXC_S_ILLEGAL 2
 #define EXC_S_ECALL 9
-#define IRQ_S_TIMER 5
 
 struct trap_frame {
   uint64_t ra;

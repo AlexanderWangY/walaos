@@ -1,3 +1,4 @@
+#include <console.h>
 #include <platform.h>
 #include <stdint.h>
 #include <uart/ns16550.h>
@@ -21,6 +22,7 @@ const char *platform_name(void) {
 
 void platform_init(void) {
     // Enable supervisor hart 0 plic
+    set_log_lvl(INFO);
     plic_init(PLIC_BASE, SHART0_CTX);
     plic_enable(PLIC_BASE, SHART0_CTX, UART0_IRQ, UART0_PRIORITY);
     ns16550_init(UART0);

@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+static enum LOG_LEVEL log_level = INFO;
+
 void console_putc(char c) {
     if (c == '\r') {
         platform_console_putc('\n');
@@ -132,6 +134,8 @@ void kprintf(const char *s, ...) {
 }
 
 void klog(enum LOG_LEVEL lvl, const char *s, ...){
+    if (lvl < log_level) return;
+    
     switch (lvl) {
         case DEBUG:
             console_puts("[DEBUG] ");
@@ -154,4 +158,8 @@ void klog(enum LOG_LEVEL lvl, const char *s, ...){
     
     va_end(args);
 
+}
+
+void set_log_lvl(enum LOG_LEVEL lvl) {
+    log_level = lvl;
 }

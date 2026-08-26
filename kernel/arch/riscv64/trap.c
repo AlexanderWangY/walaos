@@ -39,6 +39,18 @@ void handle_interrupt(struct trap_frame *tf, uint64_t cause) {
       setup_program_timer();
       klog(DEBUG, "Tick: %d\n", tick);
       break;
+    case IRQ_S_EXTERNAL: {
+      uint32_t irq = platform_irq_claim();
+      klog(DEBUG, "IRQ %d fired\n", irq);
+
+      if (irq == 10) {
+        int c = platform_console_getc();
+        platform_console_putc((char)c);
+      }
+      
+      platform_irq_complete(irq);
+      break;
+    }
     default:
       panic("unhandled interrupt trap cause");
       break;
