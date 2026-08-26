@@ -5,7 +5,7 @@ CC := $(CROSS)gcc
 
 INCLUDES := -Ikernel/include -Ikernel/drivers
 
-CFLAGS := -march=rv64imac_zicsr_zifencei -mabi=lp64 -mcmodel=medany -ffreestanding -nostdlib -fno-builtin -fno-stack-protector -Wall -Wextra -O2 -g -MMD -MP $(INCLUDES)
+CFLAGS := -march=rv64imac_zicsr_zifencei_sstc -mabi=lp64 -mcmodel=medany -ffreestanding -nostdlib -fno-builtin -fno-stack-protector -Wall -Wextra -O2 -g -MMD -MP $(INCLUDES)
 LDFLAGS := -nostdlib -static -T platform/$(PLATFORM)/linker.ld
 
 SRCS := kernel/arch/riscv64/entry.s \

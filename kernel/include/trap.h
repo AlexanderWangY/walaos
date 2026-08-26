@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#define EXC_S_MISALIGN 0
+#define EXC_S_ILLEGAL 2
 #define EXC_S_ECALL 9
 
 struct trap_frame {

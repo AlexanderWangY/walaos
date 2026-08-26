@@ -20,6 +20,13 @@ _start:
     csrw medeleg, t0
     csrw mideleg, t0
 
+    li t0, (1 << 1)       # mcounteren.TM
+    csrs mcounteren, t0
+
+      # Enable Sstc.
+    li t0, (1 << 63)      # menvcfg.STCE
+    csrs menvcfg, t0
+
     # Store mhartid somewhere Supervisor can read
     csrr tp, mhartid
 

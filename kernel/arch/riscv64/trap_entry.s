@@ -3,6 +3,15 @@
 .type supervisor_trap_entry, @function
 .global supervisor_trap_entry
 
+.type setup_program_timer, @function
+.global setup_program_timer
+
+setup_program_timer:
+    rdtime t0
+    li t1, 100000
+    add t0, t0, t1
+    csrw stimecmp, t0
+
 supervisor_trap_entry:
     # struct trap_frame is 288 bytes and remains 16-byte aligned.
     addi sp, sp, -288

@@ -1,4 +1,5 @@
 #include <platform.h>
+#include <stdint.h>
 #include <uart/ns16550.h>
 #include <irq/plic.h>
 
@@ -31,4 +32,12 @@ void platform_console_putc(char c) {
 
 int platform_console_getc(void) {
     return ns16550_getc(UART0);
+}
+
+uint32_t platform_irq_claim(void) {
+    return plic_claim(PLIC_BASE, SHART0_CTX);
+}
+
+void platform_irq_complete(uint32_t irq) {
+    plic_complete(PLIC_BASE, SHART0_CTX, irq);
 }
