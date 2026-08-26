@@ -7,8 +7,8 @@ static enum LOG_LEVEL log_level = INFO;
 
 void console_putc(char c) {
     if (c == '\r') {
-        platform_console_putc('\n');
         platform_console_putc('\r');
+        platform_console_putc('\n');
         return;
     }
     if (c == '\n')

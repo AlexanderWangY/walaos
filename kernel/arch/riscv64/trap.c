@@ -45,7 +45,7 @@ void handle_interrupt(struct trap_frame *tf, uint64_t cause) {
 
       if (irq == 10) {
         int c = platform_console_getc();
-        platform_console_putc((char)c);
+        console_putc((char)c);
       }
       
       platform_irq_complete(irq);
