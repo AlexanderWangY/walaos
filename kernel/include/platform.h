@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+
 const char *platform_name(void);
 void platform_init(void);
 

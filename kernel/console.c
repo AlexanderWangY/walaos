@@ -13,6 +13,12 @@ void console_putc(char c) {
     }
     if (c == '\n')
         platform_console_putc('\r');
+    if (c == '\b') {
+     platform_console_putc('\b');
+     platform_console_putc(' ');
+     platform_console_putc('\b');
+     return;
+    }
     platform_console_putc(c);
 }
 

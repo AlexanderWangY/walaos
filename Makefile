@@ -16,6 +16,7 @@ SRCS := kernel/arch/riscv64/entry.s \
 		kernel/panic.c \
 		kernel/drivers/uart/ns16550.c \
 		kernel/drivers/irq/plic.c \
+		kernel/mm/pmm.c \
 		platform/$(PLATFORM)/platform.c
 
 OBJS := $(SRCS:%=build/%.o)

@@ -1,8 +1,12 @@
+#include "pmm.h"
 #include <console.h>
 #include <platform.h>
 #include <stdint.h>
 #include <uart/ns16550.h>
 #include <irq/plic.h>
+
+
+#define RAM_SIZE (8ULL * 1024 * 1024 * 1024)
 
 #define UART0 0x10000000UL
 #define UART0_IRQ 10
@@ -16,6 +20,10 @@
 // Add more mharts and sharts as we go
 // Haha, shart is a funny word... poop
 
+// Declared in linker.ld
+extern char kernel_start[];
+extern char kernel_end[];
+
 const char *platform_name(void) {
   return "qemu-virt";
 }
@@ -23,6 +31,16 @@ const char *platform_name(void) {
 void platform_init(void) {
     // Enable supervisor hart 0 plic
     set_log_lvl(INFO);
+
+
+    // Init pmm but first we calculate values
+    uintptr_t start = (uintptr_t)kernel_start;
+    uintptr_t end = (uintptr_t)kernel_end;
+    uintptr_t ram_end = start + RAM_SIZE;
+    
+    init_pmm(end, ram_end, 4096);
+    klog(INFO, "PMM initialized with page size of %d, starting page 0x%X, next page 0x%X\n", 4096, end, end);
+
     plic_init(PLIC_BASE, SHART0_CTX);
     plic_enable(PLIC_BASE, SHART0_CTX, UART0_IRQ, UART0_PRIORITY);
     ns16550_init(UART0);
