@@ -13,6 +13,7 @@
 #define UART0_IRQ 10
 #define UART0_PRIORITY 1
 #define PLIC_BASE 0x0c000000UL
+#define PLIC_SIZE 0x00600000UL
 
 #define MHART0_CTX 0
 #define SHART0_CTX 1
@@ -43,10 +44,15 @@ void platform_init(void) {
     
     init_pmm(end, ram_end, 4096);
     vmm_init();
+
+    vmm_map_page(UART0, UART0, PTE_R | PTE_W);
+    vmm_map_range(start, end - start, PTE_R | PTE_W | PTE_X);
+    vmm_map_range(PLIC_BASE, PLIC_SIZE, PTE_R | PTE_W);
     
     plic_init(PLIC_BASE, SHART0_CTX);
     plic_enable(PLIC_BASE, SHART0_CTX, UART0_IRQ, UART0_PRIORITY);
     ns16550_init(UART0);
+    vmm_enable();
 };
 
 void platform_console_putc(char c) {
