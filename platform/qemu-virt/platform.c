@@ -1,4 +1,5 @@
 #include "pmm.h"
+#include "vmm.h"
 #include <console.h>
 #include <platform.h>
 #include <stdint.h>
@@ -37,10 +38,12 @@ void platform_init(void) {
     uintptr_t start = (uintptr_t)kernel_start;
     uintptr_t end = (uintptr_t)kernel_end;
     uintptr_t ram_end = start + RAM_SIZE;
+
+    klog(INFO, "RAM end 0x%lX\n", ram_end);
     
     init_pmm(end, ram_end, 4096);
-    klog(INFO, "PMM initialized with page size of %d, starting page 0x%X, next page 0x%X\n", 4096, end, end);
-
+    vmm_init();
+    
     plic_init(PLIC_BASE, SHART0_CTX);
     plic_enable(PLIC_BASE, SHART0_CTX, UART0_IRQ, UART0_PRIORITY);
     ns16550_init(UART0);
