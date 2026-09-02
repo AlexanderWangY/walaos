@@ -68,6 +68,8 @@ uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
       return NULL;
 
     uintptr_t pa = alloc_pmm();
+    if (!pa)
+      return NULL;
     memset((uint64_t *)pa, 0, PAGE_SIZE);
     *pte2 = ((pa >> 12) << 10) | PTE_V;
   }
@@ -85,6 +87,8 @@ uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
       return NULL;
 
     uintptr_t pa = alloc_pmm();
+    if (!pa)
+      return NULL;
     memset((uint64_t *)pa, 0, PAGE_SIZE);
     *pte1 = ((pa >> 12) << 10) | PTE_V;
   }
