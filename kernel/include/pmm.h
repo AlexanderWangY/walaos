@@ -14,3 +14,4 @@ typedef struct {
 void init_pmm(uintptr_t start, uintptr_t end, uint64_t page_size);
 uintptr_t alloc_pmm(void);
 void pmm_free_page(uintptr_t pa);
+void pmm_use_direct_map(void);

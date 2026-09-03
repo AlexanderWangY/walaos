@@ -1,4 +1,5 @@
 #include "panic.h"
+#include "vmm.h"
 #include <console.h>
 #include <pmm.h>
 #include <stdint.h>
@@ -149,11 +150,15 @@ void pmm_free_page(uintptr_t pa) {
 
   // Otherwise clear the page and free
   // At this point the page is 4K aligned
-  uint64_t *p = (uint64_t *)pa;
+  uint64_t *p = (uint64_t *)pa_to_va(pa);
   for (uint64_t i = 0; i < pmm.page_size / sizeof(uint64_t); i++) {
     p[i] = 0;
   }
 
   // clear bit
   pmm.bitmap[bitmap_idx] &= ~(1ULL << bit);
+}
+
+void pmm_use_direct_map(void) {
+  pmm.bitmap = (uint64_t *)(pa_to_va((uintptr_t)pmm.bitmap));
 }

@@ -8,6 +8,14 @@
 #include <stddef.h>
 
 static uint64_t *root_table;
+static bool paging_enabled = false;
+
+static inline uint64_t *table_ptr(uintptr_t pa) {
+  if (paging_enabled)
+    return (uint64_t *)pa_to_va(pa);
+
+  return (uint64_t *)pa;
+}
 
 static inline uint64_t va_vpn(uintptr_t va, int level) {
   return (va >> (12 + 9 * level)) & VPN_MASK;
@@ -41,17 +49,12 @@ int vmm_map_page(uintptr_t va, uintptr_t pa, uint64_t flags) {
   return 0;
 }
 
-int vmm_map_range(uintptr_t start, uint64_t size, uint64_t flags) {
-  uintptr_t end = start + size;
-
-  start &= ~(PAGE_SIZE - 1);
-  end = (end + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
-
-  for (uintptr_t addr = start; addr < end; addr += PAGE_SIZE) {
-      if (vmm_map_page(addr, addr, flags) != 0)
-          return -1;
+int vmm_map_range(uintptr_t va, uintptr_t pa, uint64_t size, uint64_t flags) {
+  for (uint64_t i = 0; i < size; i += PAGE_SIZE) {
+    if (vmm_map_page(va + i, pa + i, flags) != 0)
+      return -1;
   }
-
+  
   return 0;
 }
 
@@ -79,7 +82,7 @@ uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
     return NULL;
 
   uintptr_t pa1 = (*pte2 >> 10) << 12;
-  uint64_t *table1 = (uint64_t *)pa1;
+  uint64_t *table1 = table_ptr(pa1);
   uint64_t *pte1 = &table1[vpn1];
 
   if (!(*pte1 & PTE_V)) {
@@ -99,7 +102,7 @@ uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
 
   
   uintptr_t pa0 = (*pte1 >> 10) << 12;
-  uint64_t *table0 = (uint64_t *)pa0;
+  uint64_t *table0 = table_ptr(pa0);
   return &table0[vpn0];
 }
 
@@ -139,4 +142,11 @@ void vmm_enable(void) {
     : "r"(satp)
     : "memory"
   );
+
+  root_table = (uint64_t *)pa_to_va(root_pa);
+  paging_enabled = true;
+}
+
+uintptr_t pa_to_va(uintptr_t pa) {
+  return VIRT_UPPER + pa;
 }
