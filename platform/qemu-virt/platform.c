@@ -48,7 +48,7 @@ void platform_init(void) {
     vmm_map_page(UART0, UART0, PTE_R | PTE_W);
     vmm_map_range(start, start, end - start, PTE_R | PTE_W | PTE_X);
     vmm_map_range(PLIC_BASE, PLIC_BASE, PLIC_SIZE, PTE_R | PTE_W);
-    vmm_map_range(pa_to_va(start), start, ram_end - end, PTE_R | PTE_W);
+    vmm_map_range(pa_to_va(start), start, ram_end - start, PTE_R | PTE_W);
     
     plic_init(PLIC_BASE, SHART0_CTX);
     plic_enable(PLIC_BASE, SHART0_CTX, UART0_IRQ, UART0_PRIORITY);
