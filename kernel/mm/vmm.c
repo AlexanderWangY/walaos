@@ -103,6 +103,31 @@ uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
   return &table0[vpn0];
 }
 
+int vmm_unmap_page(uintptr_t va) {
+  if (va % PAGE_SIZE != 0) {
+    klog(WARN, "vmm tried to unmap poorly aligned virtual address 0x%lX\n", va);
+    return -1;
+  }
+
+  uint64_t *pte = vmm_walk(root_table, va, false);
+  if (pte == NULL || !(*pte & PTE_V)) {
+    klog(WARN, "vmm cannot unmap unmapped virtual address 0x%lX\n", va);
+    return -1;
+  }
+
+  *pte = 0;
+
+  // Flush the affected virtual address
+  __asm__ volatile(
+    "sfence.vma %0, zero"
+    :
+    : "r"(va)
+    : "memory"
+  );
+  
+  return 0;
+}
+
 void vmm_enable(void) {
   uintptr_t root_pa = (uintptr_t)root_table;
   uint64_t satp = (8ULL << 60) | (root_pa >> 12);
