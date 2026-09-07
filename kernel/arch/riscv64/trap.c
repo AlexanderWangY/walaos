@@ -1,7 +1,7 @@
 #include <console.h>
 #include <panic.h>
 #include <stdint.h>
-#include <trap.h>
+#include <arch/riscv64/trap.h>
 #include <platform.h>
 
 static uint64_t tick = 0;

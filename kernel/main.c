@@ -7,13 +7,11 @@
 #include <platform.h>
 #include <stdint.h>
 #include <panic.h>
-#include <trap.h>
 
 void kmain(unsigned long hart_id, unsigned long dtb) {
     (void)hart_id;
     (void)dtb;
 
-    trap_init();
     platform_init();
     console_puts("walaOS: hello from ");
     console_puts(platform_name());

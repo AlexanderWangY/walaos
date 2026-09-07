@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <uart/ns16550.h>
 #include <irq/plic.h>
+#include <arch/riscv64/trap.h>
 
 
 #define RAM_SIZE (8ULL * 1024 * 1024 * 1024)
@@ -33,6 +34,7 @@ const char *platform_name(void) {
 void platform_init(void) {
     // Enable supervisor hart 0 plic
     set_log_lvl(INFO);
+    trap_init();
 
 
     // Init pmm but first we calculate values
