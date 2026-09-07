@@ -77,7 +77,8 @@ uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
     *pte2 = ((pa >> 12) << 10) | PTE_V;
   }
 
-  // NOT page table entry, this is a leaf???
+  // Superpage leaf, not a table pointer. Not supported yet.
+  // TODO: handle Sv39 gigapage (level-2) / megapage (level-1) leaves instead of bailing.
   if (*pte2 & (PTE_W | PTE_R | PTE_X))
     return NULL;
 
@@ -96,7 +97,7 @@ uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
     *pte1 = ((pa >> 12) << 10) | PTE_V;
   }
 
-  // NOT page table entry, this is a leaf???
+  // Superpage leaf, not a table pointer. Not supported yet.
   if (*pte1 & (PTE_W | PTE_R | PTE_X))
     return NULL;
 
