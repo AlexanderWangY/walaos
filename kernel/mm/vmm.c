@@ -21,6 +21,8 @@ static inline uint64_t va_vpn(uintptr_t va, int level) {
   return (va >> (12 + 9 * level)) & VPN_MASK;
 }
 
+static uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc);
+
 void vmm_init(void) {
   root_table = (uint64_t *)pmm_alloc_page();
   if (!root_table)
@@ -58,7 +60,7 @@ int vmm_map_range(uintptr_t va, uintptr_t pa, uint64_t size, uint64_t flags) {
   return 0;
 }
 
-uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
+static uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
 
   uint64_t vpn2 = va_vpn(va, 2);
   uint64_t vpn1 = va_vpn(va, 1);

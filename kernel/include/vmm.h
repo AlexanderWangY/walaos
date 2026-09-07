@@ -20,8 +20,6 @@ int vmm_map_page(uintptr_t va, uintptr_t pa, uint64_t flags);
 int vmm_unmap_page(uintptr_t va);
 int vmm_map_range(uintptr_t va, uintptr_t pa, uint64_t size, uint64_t flags);
 
-uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc);
-
 void vmm_enable(void);
 
 uintptr_t pa_to_va(uintptr_t pa);
