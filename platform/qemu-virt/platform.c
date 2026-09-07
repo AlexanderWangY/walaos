@@ -42,7 +42,7 @@ void platform_init(void) {
 
     klog(INFO, "RAM end 0x%lX\n", ram_end);
     
-    init_pmm(end, ram_end, 4096);
+    pmm_init(end, ram_end, 4096);
     vmm_init();
 
     vmm_map_page(UART0, UART0, PTE_R | PTE_W);

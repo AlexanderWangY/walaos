@@ -26,7 +26,7 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
     kprintf("64-bit hex test: 0x%lX\n", 0x123456789ABCDEF0UL);
 
     
-    uintptr_t pa = alloc_pmm();
+    uintptr_t pa = pmm_alloc_page();
     uint64_t *direct = (uint64_t *)pa_to_va(pa);
 
     direct[0] = 0x123456789ABCDEF0;

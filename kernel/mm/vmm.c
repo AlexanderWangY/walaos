@@ -22,7 +22,7 @@ static inline uint64_t va_vpn(uintptr_t va, int level) {
 }
 
 void vmm_init(void) {
-  root_table = (uint64_t *)alloc_pmm();
+  root_table = (uint64_t *)pmm_alloc_page();
   if (!root_table)
     panic("VMM failed to allocate root table\n");
   memset(root_table, 0, PAGE_SIZE);
@@ -70,7 +70,7 @@ uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
     if (!alloc)
       return NULL;
 
-    uintptr_t pa = alloc_pmm();
+    uintptr_t pa = pmm_alloc_page();
     if (!pa)
       return NULL;
     memset(table_ptr(pa), 0, PAGE_SIZE);
@@ -89,7 +89,7 @@ uint64_t *vmm_walk(uint64_t *root, uintptr_t va, bool alloc) {
     if (!alloc)
       return NULL;
 
-    uintptr_t pa = alloc_pmm();
+    uintptr_t pa = pmm_alloc_page();
     if (!pa)
       return NULL;
     memset(table_ptr(pa), 0, PAGE_SIZE);

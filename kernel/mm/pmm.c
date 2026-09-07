@@ -6,7 +6,7 @@
 
 static pmm_controller pmm;
 
-void init_pmm(uintptr_t start, uintptr_t end, uint64_t page_size) {
+void pmm_init(uintptr_t start, uintptr_t end, uint64_t page_size) {
   pmm.start = 0;
   pmm.end = 0;
   pmm.page_size = 0;
@@ -95,7 +95,7 @@ Bitmap entry index = 10 (just arbitrarily chosen)
           ^
           This is the page to be allocated.
 */
-uintptr_t alloc_pmm(void) {
+uintptr_t pmm_alloc_page(void) {
   uint64_t idx = pmm.bitmap_size;
   for (uint64_t i = 0; i < pmm.bitmap_size; i++) {
     if (pmm.bitmap[i] != UINT64_MAX) {
