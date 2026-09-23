@@ -29,6 +29,7 @@ SRCS := kernel/arch/riscv64/entry.s \
 		kernel/drivers/irq/plic.c \
 		kernel/mm/pmm.c \
 		kernel/mm/vmm.c \
+		kernel/mm/kheap.c \
 		kernel/string.c \
 		platform/$(PLATFORM)/platform.c
 
