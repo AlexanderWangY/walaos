@@ -17,6 +17,8 @@ typedef struct kblock_t {
   struct kblock_t *prev;
 } kblock_t;
 
+static const size_t HEADER_SIZE = (sizeof(kblock_t) + 15) & ~(size_t)15;
+
 static kblock_t *kheap;
 
 void kheap_init(void) {
@@ -30,34 +32,36 @@ void kheap_init(void) {
 }
 
 void *kmalloc(size_t size) {
-  // Need to fit size + kblock_t
-  size_t alloc_size = align_up_16(sizeof(kblock_t) + size);
 
   kblock_t *curr = kheap;
-  while (curr && !curr->free && curr->size >= alloc_size) curr = curr->next;
 
-  // Failed to malloc a page
-  if (curr == NULL) return 0;
+  while (curr && (!curr->free || curr->size >= (align_up_16(size) + HEADER_SIZE)))
+    curr = curr->next;
 
-  size_t remaining = curr->size - alloc_size;
+  if (curr == NULL)
+    return NULL;
 
-  if (remaining >= align_up_16(sizeof(kblock_t)) + 16) {
-    kblock_t *new_block = (kblock_t *)(unsigned char *)curr + alloc_size;
+  size_t remaining = curr->size - (align_up_16(size) + HEADER_SIZE);
+  if (remaining > HEADER_SIZE + 16) {
+    // Allocated and split
 
-    new_block->size = remaining - align_up_16(sizeof(kblock_t));
+    kblock_t *new_block = (kblock_t *)(unsigned char *)curr + HEADER_SIZE + curr->size;
+
+    new_block->size = remaining - HEADER_SIZE;
     new_block->free = true;
     new_block->next = curr->next;
     new_block->prev = curr;
 
     curr->free = false;
+    curr->size = align_up_16(size);
     curr->next = new_block;
-    curr->size = alloc_size;
+
+    return (unsigned char *)curr + HEADER_SIZE;
   } else {
-    // just give the entire block
+    // handoff entire block, not enough left over to justify splitting
     curr->free = false;
-    return (unsigned char *)curr + align_up_16(sizeof(*curr));
-  }
-  
+    return (unsigned char *)curr+ HEADER_SIZE;
+  }  
 }
 
 void kfree(void *ptr) {}

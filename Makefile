@@ -46,6 +46,10 @@ build/%.o: %
 run: kernel.elf
 	qemu-system-riscv64 -machine virt -smp 1 -m 8G -bios none -display none -serial stdio -kernel $<
 
+# Used for GDB debugging
+run-debug: kernel.elf
+	qemu-system-riscv64 -s -S -machine virt -smp 1 -m 8G -bios none -display none -serial stdio -kernel $<
+
 clean:
 	rm -rf build kernel.elf
 
