@@ -23,4 +23,5 @@ int vmm_map_range(uintptr_t va, uintptr_t pa, uint64_t size, uint64_t flags);
 void vmm_enable(void);
 
 uintptr_t pa_to_va(uintptr_t pa);
+uintptr_t va_to_pa(uintptr_t va);
 

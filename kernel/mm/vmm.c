@@ -153,3 +153,7 @@ void vmm_enable(void) {
 uintptr_t pa_to_va(uintptr_t pa) {
   return VIRT_UPPER + pa;
 }
+
+uintptr_t va_to_pa(uintptr_t va) {
+  return va - VIRT_UPPER;
+}

@@ -65,10 +65,30 @@ void *kmalloc(size_t size) {
   } else {
     // handoff entire block, not enough left over to justify splitting
     curr->free = false;
-    return (unsigned char *)curr+ HEADER_SIZE;
+    return (unsigned char *)curr + HEADER_SIZE;
   }  
 }
 
 void kfree(void *ptr) {
-  
+  if (ptr == NULL) return;
+
+  // 1. cast to kblock_t
+  kblock_t *block = (kblock_t *)((unsigned char *)ptr - HEADER_SIZE);
+  // 2. free the block
+  block->free = true;
+  // 3. merge sections (prev and next)
+
+  // Merge previous
+  if (block->prev && block->prev->free) {
+    // New block has size this size + HEADER SIZE
+    block->prev->size += HEADER_SIZE + block->size;
+    block->prev->next = block->next;
+    block = block->prev;
+  }
+
+  // Merge next
+  if (block->next && block->next->free) {
+    block->size += HEADER_SIZE + block->next->size;
+    block->next = block->next->next;
+  }
 }
