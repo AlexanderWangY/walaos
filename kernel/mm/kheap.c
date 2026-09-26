@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <console.h>
 
 static inline size_t align_up_16(size_t value) {
   return (value + 15) & ~(size_t)15;
@@ -20,18 +21,44 @@ typedef struct kblock_t {
 static const size_t HEADER_SIZE = (sizeof(kblock_t) + 15) & ~(size_t)15;
 
 static kblock_t *kheap;
+static size_t kheap_pages;
+static uintptr_t kheap_end;
+
+static bool kheap_grow(size_t pages) {
+  // First check if within bounds
+  if (kheap_end + pages * PAGE_SIZE > KHEAP_BASE + KHEAP_SIZE) {
+      klog(WARN, "Can't grow kheap. kheap is capped at %d MiB",
+           KHEAP_SIZE / (1024 * 1024));
+      return false;
+  }
+  
+  kblock_t *block_end = kheap;
+  while (block_end && block_end->next)
+    block_end = block_end->next;
+  
+  for (size_t i = 0; i < pages; ++i) {
+    uintptr_t pa = pmm_alloc_page();
+    if (!pa) return false;
+
+    vmm_map_page(KHEAP_BASE + (kheap_pages * PAGE_SIZE), pa, PTE_R | PTE_W | PTE_X);
+    kheap_pages += 1;
+    kheap_end += PAGE_SIZE;
+  }
+}
 
 void kheap_init(void) {
   uintptr_t pa = pmm_alloc_page();
-  uintptr_t va = pa_to_va(pa);
-  vmm_map_page(va, pa, PTE_R | PTE_W | PTE_X);
+  vmm_map_page(KHEAP_BASE, pa, PTE_R | PTE_W | PTE_X);
 
-  kheap = (kblock_t*)va;
+  kheap = (kblock_t *)KHEAP_BASE;
+  
   kheap->free = true;
   kheap->next = NULL;
   kheap->prev = NULL;
   kheap->size = PAGE_SIZE - HEADER_SIZE;
 
+  kheap_end = KHEAP_BASE + PAGE_SIZE;
+  kheap_pages = 1;
 }
 
 void *kmalloc(size_t size) {
@@ -40,8 +67,11 @@ void *kmalloc(size_t size) {
   while (curr && (!curr->free || curr->size < align_up_16(size)))
     curr = curr->next;
 
-  if (curr == NULL)
-    return NULL;
+  if (curr == NULL) {
+    // This means we no longer have enough space, allocate more!
+    kheap_grow(size / PAGE_SIZE);
+    // TODO: Continue here
+  }
   
   size_t remaining = curr->size - align_up_16(size);
   if (remaining > HEADER_SIZE + 16) {
