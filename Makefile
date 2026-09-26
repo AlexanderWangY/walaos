@@ -31,6 +31,7 @@ SRCS := kernel/arch/riscv64/entry.s \
 		kernel/mm/vmm.c \
 		kernel/mm/kheap.c \
 		kernel/string.c \
+		kernel/sched.c \
 		platform/$(PLATFORM)/platform.c
 
 OBJS := $(SRCS:%=build/%.o)
