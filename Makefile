@@ -16,7 +16,7 @@ CC := $(CROSS)gcc
 
 INCLUDES := -Ikernel/include -Ikernel/drivers
 
-CFLAGS := -march=rv64imac_zicsr_zifencei_sstc -mabi=lp64 -mcmodel=medany -ffreestanding -nostdlib -fno-builtin -fno-stack-protector -Wall -Wextra -O2 -g -MMD -MP $(INCLUDES)
+CFLAGS := -march=rv64imac_zicsr_zifencei_sstc -mabi=lp64 -mcmodel=medany -ffreestanding -g -nostdlib -fno-builtin -fno-stack-protector -Wall -Wextra -O2 -g -MMD -MP $(INCLUDES)
 LDFLAGS := -nostdlib -static -T platform/$(PLATFORM)/linker.ld
 
 SRCS := kernel/arch/riscv64/entry.s \
@@ -29,6 +29,7 @@ SRCS := kernel/arch/riscv64/entry.s \
 		kernel/drivers/irq/plic.c \
 		kernel/mm/pmm.c \
 		kernel/mm/vmm.c \
+		kernel/mm/kheap.c \
 		kernel/string.c \
 		platform/$(PLATFORM)/platform.c
 
@@ -44,6 +45,10 @@ build/%.o: %
 
 run: kernel.elf
 	qemu-system-riscv64 -machine virt -smp 1 -m 8G -bios none -display none -serial stdio -kernel $<
+
+# Used for GDB debugging
+run-debug: kernel.elf
+	qemu-system-riscv64 -s -S -machine virt -smp 1 -m 8G -bios none -display none -serial stdio -kernel $<
 
 clean:
 	rm -rf build kernel.elf

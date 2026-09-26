@@ -6,6 +6,7 @@
 #include <uart/ns16550.h>
 #include <irq/plic.h>
 #include <arch/riscv64/trap.h>
+#include <kheap.h>
 
 
 #define RAM_SIZE (8ULL * 1024 * 1024 * 1024)
@@ -58,6 +59,8 @@ void platform_init(void) {
 
     vmm_enable();
     pmm_use_direct_map();
+
+    kheap_init();    
 };
 
 void platform_console_putc(char c) {

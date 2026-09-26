@@ -3,6 +3,7 @@
 // From a0, and a1 respectively, DO NOT TOUCH a0 OR a1 in entry.s. DO NOT DO NOT DO NOT
 #include "pmm.h"
 #include "vmm.h"
+#include <kheap.h>
 #include <console.h>
 #include <platform.h>
 #include <stdint.h>
@@ -31,6 +32,16 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
     kprintf("direct-map value: 0x%lX\n", direct[0]);
 
     vmm_map_page(0x60000000, pa, PTE_R | PTE_W);
+
+    // Attempt to allocate kheap
+    char *c = kmalloc(10);
+    int *nums = kmalloc(20 * sizeof(int));
+
+    nums[10] = 40;
+
+    kfree(c);
+    kfree(nums);
+    
     for (;;)
         __asm__ volatile ("wfi");
 }
