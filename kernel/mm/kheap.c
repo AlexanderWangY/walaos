@@ -30,7 +30,7 @@ void kheap_init(void) {
   kheap->free = true;
   kheap->next = NULL;
   kheap->prev = NULL;
-  kheap->size = PAGE_SIZE - align_up_16(sizeof(kblock_t));
+  kheap->size = PAGE_SIZE - HEADER_SIZE;
 
 }
 
