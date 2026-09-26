@@ -36,11 +36,13 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
     // Attempt to allocate kheap
     char *c = kmalloc(10);
     int *nums = kmalloc(20 * sizeof(int));
+    char *longg = kmalloc(7453);
 
     nums[10] = 40;
 
     kfree(c);
     kfree(nums);
+    kfree(longg);
     
     for (;;)
         __asm__ volatile ("wfi");
