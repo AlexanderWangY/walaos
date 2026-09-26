@@ -1,0 +1,18 @@
+walaOS is a 64-bit RISC V operating system.
+
+Done:
+- Kernel boot
+- Serial console and logging
+- RISC V traps and interrupts
+- Physical and virtual memory management
+- Kernel heap allocation
+
+To do:
+- Add a scheduler
+- Add user programs and processes
+- Add a filesystem
+- Add more hardware drivers
+- Add networking
+- Add a shell
+- Add gigapage and megapage support
+- Refactor and clean up the kernel
