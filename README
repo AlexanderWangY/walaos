@@ -1,5 +1,32 @@
 walaOS is a 64-bit RISC V operating system.
 
+## Build and Run
+
+The build requires GNU Make, a RISC-V cross-compiler (`riscv64-elf-gcc`,
+`riscv64-unknown-elf-gcc`, or `riscv64-linux-gnu-gcc`), and QEMU's RISC-V
+system emulator (`qemu-system-riscv64`). On Windows, use an environment such
+as WSL or MSYS2 that provides GNU Make and the required tools.
+
+Build the kernel with:
+
+```sh
+make
+```
+
+Run it in QEMU with serial output in the terminal:
+
+```sh
+make run
+```
+
+For GDB debugging, start QEMU paused with its remote debugger enabled:
+
+```sh
+make run-debug
+```
+
+Remove generated build files with `make clean`.
+
 Done:
 - Kernel boot
 - Serial console and logging
