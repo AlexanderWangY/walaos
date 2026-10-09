@@ -86,3 +86,7 @@ void supervisor_trap_handler(struct trap_frame *tf) {
      return handle_exception(tf, cause);
    }
 }
+
+void irq_disable(void) {
+  __asm__ volatile ("csrrc zero, sstatus, %0" :: "r"(1 << 1) : "memory");
+}

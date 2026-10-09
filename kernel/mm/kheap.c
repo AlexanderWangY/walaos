@@ -141,6 +141,11 @@ void kfree(void *ptr) {
     // New block has size this size + HEADER SIZE
     block->prev->size += HEADER_SIZE + block->size;
     block->prev->next = block->next;
+
+    if (block->next) {
+      block->next->prev = block->prev;
+    }
+    
     block = block->prev;
   }
 
@@ -148,5 +153,8 @@ void kfree(void *ptr) {
   if (block->next && block->next->free) {
     block->size += HEADER_SIZE + block->next->size;
     block->next = block->next->next;
+
+    if (block->next)
+      block->next->prev = block;
   }
 }
