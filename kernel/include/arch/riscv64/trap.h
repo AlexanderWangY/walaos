@@ -58,3 +58,4 @@ struct trap_frame {
 
 void trap_init(void);
 void supervisor_trap_handler(struct trap_frame *tf);
+void irq_disable(void);

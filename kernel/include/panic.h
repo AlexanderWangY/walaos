@@ -2,4 +2,4 @@
 
 #include <console.h>
 
-void panic(const char *msg);
+__attribute__((noreturn)) void panic(const char *msg);
