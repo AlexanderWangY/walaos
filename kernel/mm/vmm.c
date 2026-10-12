@@ -47,7 +47,7 @@ int vmm_map_page(uintptr_t va, uintptr_t pa, uint64_t flags) {
   if (*pte & PTE_V)
     return -1;
 
-  *pte = ((pa >> 12) << 10) | flags | PTE_V;
+  *pte = ((pa >> 12) << 10) | flags | PTE_V | PTE_A | PTE_D;
   return 0;
 }
 
