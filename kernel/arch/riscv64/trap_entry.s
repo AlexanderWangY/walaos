@@ -66,6 +66,9 @@ supervisor_trap_entry:
     mv a0, sp
     call supervisor_trap_handler
 
+.Lrestore_frame:
+    mv sp, a0 # a0 is the return *tf
+
     ld ra, 0(sp)
     ld gp, 16(sp)
     ld tp, 24(sp)

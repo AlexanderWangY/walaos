@@ -11,6 +11,8 @@
 #define PTE_R (1 << 1)
 #define PTE_W (1 << 2)
 #define PTE_X (1 << 3)
+#define PTE_A (1 << 6)
+#define PTE_D (1 << 7)
 
 // 0b111111111
 #define VPN_MASK 0x1FF
