@@ -6,9 +6,9 @@ Done:
 - RISC V traps and interrupts
 - Physical and virtual memory management
 - Kernel heap allocation
+- Add a scheduler (kinda bad rn, but it works)
 
 To do:
-- Add a scheduler
 - Add user programs and processes
 - Add a filesystem
 - Add more hardware drivers
