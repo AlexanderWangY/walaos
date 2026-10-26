@@ -3,8 +3,7 @@
 #include <stdint.h>
 #include <arch/riscv64/trap.h>
 #include <platform.h>
-
-static uint64_t tick = 0;
+#include <sched.h>
 
 extern void supervisor_trap_entry(void);
 extern void setup_program_timer(void);
@@ -23,10 +22,13 @@ static inline void write_stvec(uintptr_t value) {
 
 void trap_init(void) {
   write_stvec((uintptr_t)supervisor_trap_entry);
+  // External interrupts remain gated by the global interrupt enable.
+  __asm__ volatile ("csrs sie, %0" :: "r"(1UL << 9) : "memory");
+}
+
+void timer_start(void) {
   setup_program_timer();
-  __asm__ volatile ("csrs sie, %0" :: "r"(1 << 9));
-  __asm__ volatile("csrs sie, %0" :: "r"(1 << 5)); // Supervisor timer
-  __asm__ volatile ("csrs sstatus, %0" :: "r"(1 << 1));
+  __asm__ volatile("csrs sie, %0" :: "r"(1UL << 5) : "memory");
 }
 
 
@@ -34,10 +36,8 @@ struct trap_frame *handle_interrupt(struct trap_frame *tf, uint64_t cause) {
 
   switch (cause) {
     case IRQ_S_TIMER:
-      ++tick;
       setup_program_timer();
-      klog(DEBUG, "Tick: %d\n", tick);
-      // For example here we could call scheduler and return the new trapframe to restore
+      return sched_tick(tf);
       break;
     case IRQ_S_EXTERNAL: {
       uint32_t irq = platform_irq_claim();
@@ -90,4 +90,8 @@ struct trap_frame *supervisor_trap_handler(struct trap_frame *tf) {
 
 void irq_disable(void) {
   __asm__ volatile ("csrrc zero, sstatus, %0" :: "r"(1 << 1) : "memory");
+}
+
+void irq_enable(void) {
+  __asm__ volatile ("csrs sstatus, %0" :: "r"(1UL << 1) : "memory");
 }

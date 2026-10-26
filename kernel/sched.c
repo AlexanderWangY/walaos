@@ -57,13 +57,43 @@ void sched_init(void) {
   current = &init_thread;
 };
 
-struct thread *thread_create(void (*entry)(void), void *arg) {
+void sched_start(void) {
+  timer_start();
+  irq_enable();
+}
+
+struct thread *thread_create(void (*entry)(void *), void *arg) {
   struct thread *t = kmalloc(sizeof *t);
   void *stack = kmalloc(STACK_SIZE);
 
   uint8_t *top = (uint8_t *)stack + STACK_SIZE;
   struct trap_frame *tf = (struct trap_frame *)(top - sizeof *tf);
-  memset
+
+  *tf = (struct trap_frame){0};
+
+  tf->sepc = (uint64_t)entry;
+  tf->a0 = (uint64_t)arg;
+  tf->sp = (uint64_t)top;
+  tf->sstatus = (1UL << 8) | (1ULL <<  5);
+
+  asm volatile("mv %0, gp" : "=r"(tf->gp));
+  asm volatile("mv %0, tp" : "=r"(tf->tp));
+  
+  t->id = next_id++;
+  t->stack = stack;
+  t->tf = tf;
+  t->state = NEW;
+  t->next = NULL;
+
+  return t;
+}
+
+void thread_start(struct thread *t) {
+  if (t->state != NEW)
+    return;
+
+  t->state = READY;
+  enqueue(t);
 }
 
 struct trap_frame *sched_tick(struct trap_frame *tf) {

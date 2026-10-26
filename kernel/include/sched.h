@@ -6,6 +6,7 @@
 enum thread_state {
   RUNNING,
   READY,
+  NEW,
 };
 
 struct thread {
@@ -17,5 +18,7 @@ struct thread {
 };
 
 void sched_init(void);
-struct thread *thread_create(void (*entry)(void), void *args);
+void sched_start(void);
+struct thread *thread_create(void (*entry)(void *), void *args);
+void thread_start(struct thread *t);
 struct trap_frame *sched_tick(struct trap_frame *tf);

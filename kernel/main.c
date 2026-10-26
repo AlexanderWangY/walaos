@@ -1,6 +1,7 @@
 // kernel main entry point, but uses architecture compiled from arch/
 
 // From a0, and a1 respectively, DO NOT TOUCH a0 OR a1 in entry.s. DO NOT DO NOT DO NOT
+#include "include/sched.h"
 #include "pmm.h"
 #include "vmm.h"
 #include <kheap.h>
@@ -8,6 +9,14 @@
 #include <platform.h>
 #include <stdint.h>
 #include <panic.h>
+
+
+static void counter(void* arg) {
+    int id = (int)(intptr_t)arg;
+    for (;;) {
+        kprintf("Worker %d\n", id);
+    }
+}
 
 void kmain(unsigned long hart_id, unsigned long dtb) {
     (void)hart_id;
@@ -43,7 +52,17 @@ void kmain(unsigned long hart_id, unsigned long dtb) {
     kfree(c);
     kfree(nums);
     kfree(longg);
-    
+
+    sched_init();
+
+    struct thread *x = thread_create(counter, (void *)(intptr_t)1);
+    struct thread *y = thread_create(counter, (void *)(intptr_t)2);
+    struct thread *z = thread_create(counter, (void *)(intptr_t)3);
+    thread_start(x);
+    thread_start(y);
+    thread_start(z);
+
+    sched_start();
     for (;;)
         __asm__ volatile ("wfi");
 }
