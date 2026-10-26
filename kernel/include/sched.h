@@ -9,8 +9,13 @@ enum thread_state {
 };
 
 struct thread {
+  uint64_t id;
+  void *stack;
   struct trap_frame *tf;
   enum thread_state state;
-  uint64_t id;
   struct thread *next;
 };
+
+void sched_init(void);
+struct thread *thread_create(void (*entry)(void), void *args);
+struct trap_frame *sched_tick(struct trap_frame *tf);

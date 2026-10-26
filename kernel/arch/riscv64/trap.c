@@ -30,14 +30,14 @@ void trap_init(void) {
 }
 
 
-void handle_interrupt(struct trap_frame *tf, uint64_t cause) {
-  (void)tf;
+struct trap_frame *handle_interrupt(struct trap_frame *tf, uint64_t cause) {
 
   switch (cause) {
     case IRQ_S_TIMER:
       ++tick;
       setup_program_timer();
       klog(DEBUG, "Tick: %d\n", tick);
+      // For example here we could call scheduler and return the new trapframe to restore
       break;
     case IRQ_S_EXTERNAL: {
       uint32_t irq = platform_irq_claim();
@@ -54,10 +54,12 @@ void handle_interrupt(struct trap_frame *tf, uint64_t cause) {
     default:
       panic("unhandled interrupt trap cause");
       break;
-  }  
+  }
+
+  return tf;
 }
 
-void handle_exception(struct trap_frame *tf, uint64_t cause) {
+struct trap_frame *handle_exception(struct trap_frame *tf, uint64_t cause) {
   log_trap(tf->sepc, tf->sstatus, tf->scause, tf->stval);
   switch (cause) {
     case EXC_S_MISALIGN:
@@ -67,17 +69,16 @@ void handle_exception(struct trap_frame *tf, uint64_t cause) {
       panic("Illegal instruction ran");
       break;
     case EXC_S_ECALL:
-      log_trap(tf->sepc, tf->sstatus, tf->scause, tf->stval);
       tf->sepc += 4;
       break;
     default:
       panic("unhandled exception trap cause");
       break;
-    
-  }  
+  }
+  return tf;
 }
 
-void supervisor_trap_handler(struct trap_frame *tf) {
+struct trap_frame *supervisor_trap_handler(struct trap_frame *tf) {
    uint64_t is_interrupt = tf->scause >> 63;
    uint64_t cause = tf->scause & ~(1ULL << 63);
    if (is_interrupt) {
